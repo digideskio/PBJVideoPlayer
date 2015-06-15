@@ -157,6 +157,26 @@ static NSString * const PBJVideoPlayerControllerReadyForDisplay = @"readyForDisp
     return maxDuration;
 }
 
+-(NSTimeInterval)currentTime
+{
+    NSTimeInterval currentTime = -1;
+    if (CMTIME_IS_NUMERIC(_playerItem.currentTime))
+    {
+        currentTime = CMTimeGetSeconds(_playerItem.currentTime);
+    }
+    
+    return currentTime;
+}
+
+-(NSTimeInterval)percentageViewed
+{
+    if (self.maxDuration <= 0 || self.currentTime < 0) {
+        return 0;
+    }
+    
+    return self.currentTime / self.maxDuration;
+}
+
 - (void)_setAsset:(AVAsset *)asset
 {
     if (_asset == asset)
