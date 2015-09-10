@@ -25,6 +25,7 @@
 #import "PBJVideoPlayerController.h"
 #import "PBJVideoView.h"
 
+#import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
 #define LOG_PLAYER 0
@@ -65,6 +66,7 @@ static NSString * const PBJVideoPlayerControllerReadyForDisplay = @"readyForDisp
     AVAsset *_asset;
     AVPlayer *_player;
     AVPlayerItem *_playerItem;
+    id _playerTimeObserver;
 
     NSString *_videoPath;
     PBJVideoView *_videoView;
@@ -283,6 +285,7 @@ static NSString * const PBJVideoPlayerControllerReadyForDisplay = @"readyForDisp
 
     // AVPlayer KVO
     [_player removeObserver:self forKeyPath:PBJVideoPlayerControllerRateKey context:(__bridge void *)PBJVideoPlayerObserverContext];
+    [_player removeTimeObserver:_playerTimeObserver];
 
     // player
     [_player pause];
@@ -300,6 +303,12 @@ static NSString * const PBJVideoPlayerControllerReadyForDisplay = @"readyForDisp
 
     // Player KVO
     [_player addObserver:self forKeyPath:PBJVideoPlayerControllerRateKey options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:(__bridge void *)(PBJVideoPlayerObserverContext)];
+    __weak __typeof__(self) weakSelf = self;
+    _playerTimeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(1.0f / 60.0f, NSEC_PER_SEC)
+                                                                queue:NULL
+                                                           usingBlock:^(CMTime time) {
+                                                               [weakSelf _timeObserverChangedToTime:time];
+                                                           }];
 
     // load the playerLayer view
     _videoView = [[PBJVideoView alloc] initWithFrame:CGRectZero];
@@ -325,6 +334,16 @@ static NSString * const PBJVideoPlayerControllerReadyForDisplay = @"readyForDisp
 }
 
 #pragma mark - private methods
+
+- (void)_timeObserverChangedToTime:(CMTime)time
+{
+    if ([self.delegate respondsToSelector:@selector(videoPlayer:didChangeToPlaybackPercent:)])
+    {
+        double duration = CMTimeGetSeconds(_playerItem.duration);
+        double currentTime = CMTimeGetSeconds(time);
+        [self.delegate videoPlayer:self didChangeToPlaybackPercent:(CGFloat)(currentTime / duration)];
+    }
+}
 
 - (void)_videoPlayerAudioSessionActive:(BOOL)active
 {

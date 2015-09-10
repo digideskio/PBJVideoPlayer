@@ -72,5 +72,6 @@ typedef NS_ENUM(NSInteger, PBJVideoPlayerBufferingState) {
 
 @optional
 - (void)videoPlayerBufferringStateDidChange:(PBJVideoPlayerController *)videoPlayer;
+- (void)videoPlayer:(PBJVideoPlayerController *)videoPlayer didChangeToPlaybackPercent:(CGFloat)percent;
 
 @end
