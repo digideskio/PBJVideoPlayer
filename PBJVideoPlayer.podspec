@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'PBJVideoPlayer'
-  s.version = '0.2.2'
+  s.version = 'v0.2.2'
   s.summary = 'iOS video player, simple drop in component featuring touch-to-play'
   s.homepage = 'https://github.com/diy/PBJVideoPlayer'
   s.social_media_url = 'http://twitter.com/piemonte'
